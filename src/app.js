@@ -38,7 +38,33 @@ app.get("/address", (req, res) => {
 });
 
 app.post("/address", (req, res) => {
+  res.send("add an address");
   //get
+  const {
+    firstName,
+    lastName,
+    address1,
+    address2,
+    city,
+    state,
+    zip,
+  } = req.body;
+  console.log(req.body);
+  //validate
+  //
+  const id = uuid();
+  const newAddress = {
+    id,
+    firstName,
+    lastName,
+    address1,
+    address2,
+    city,
+    state,
+    zip,
+  };
+  addresses.push(newAddress);
+  res.status(201).location(`http://localhost:8000/user/${id}`).json({ id: id });
 });
 app.delete("/address/:id", (req, res) => {
   const { id } = req.params;
