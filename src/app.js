@@ -17,6 +17,14 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 
+const validateBearerToken = (req, res, next) => {
+  const apiToken = process.env.API_TOKEN;
+  const authToken = req.get("authorization");
+  if (!authToken || authToken.split("")[1] !== apiToken) {
+    return res.status(401).json({ error: "unauthorised request" });
+  }
+  next();
+};
 const addresses = [
   {
     id: "ce20079c-2326-4f17-8ac4-f617bfd28b7f",
@@ -37,6 +45,9 @@ app.get("/address", (req, res) => {
   res.json(addresses);
 });
 
+app.post("/address", validateBearerToken);
+app.delete("address", validateBearerToken);
+
 app.post("/address", (req, res) => {
   res.send("add an address");
   //get
@@ -44,13 +55,38 @@ app.post("/address", (req, res) => {
     firstName,
     lastName,
     address1,
-    address2,
+    address2 = false,
     city,
     state,
     zip,
   } = req.body;
-  console.log(req.body);
   //validate
+  if (!address1) {
+    return res.status(400).send("address is required");
+  }
+  if (!firstName) {
+    return res.status(400).send("first name is required");
+  }
+  if (!lastName) {
+    return res.status(400).send("last name is required");
+  }
+  if (!city) {
+    return res.status(400).send("city is required");
+  }
+  if (!state) {
+    return res.status(400).send("state is required");
+  }
+  if (!zip) {
+    return res.status(400).send("zip is required");
+  }
+
+  if (zip.length !== 5) {
+    return res.status(400).send("zip code must be at least 5 characters");
+  }
+
+  if (state.length !== 2) {
+    return res.status(400).send("please enter state abbreviation");
+  }
   //
   const id = uuid();
   const newAddress = {
